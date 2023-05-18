@@ -1,194 +1,1326 @@
 ---
-title: A University of Warwick Themed Presentation
-subtitle: TODO - maybe add Warwick logo to title page?
-author: Your Name
-date: last-modified
+title: How to Contribute to Base R
+subtitle: '<img src="media/reshot-icon-code-JY2WVRU489.svg" alt="Cartoon of a code script with a bug (insect) under a magnifying glass" width="200">'
+author: Heather Turner
+date: "18 May 2023"
 date-format: long
 format: 
-  warwickpres-revealjs: default
+  warwickpres-revealjs:
+    width: 1600
+    height: 900
+knitr:
+  opts_chunk: 
+    echo: true
 ---
 
-## Introduction
+## Contributing to R
 
-This is a Quarto presentation format that is consistent with The University of Warwick's [ID7 branding](https://id7.warwick.ac.uk) (especially [colours](https://id7.warwick.ac.uk/components/colour-palette/) and [font](https://warwick.ac.uk/services/its/servicessupport/web/sitebuilder2/id7/faqs/fonts/)).
+R is maintained by the R Core Team
 
-:::{.callout-note}
-It is *not*, however, a University of Warwick branded presentation in the sense that it does not feature the university logo, nor has it been officially signed-off by whoever would need to sign-off such things.
+Members of the R Community can contribute in various ways:
+
+* Analysing and fixing bugs
+* Translating R's messages, warnings and errors
+* Testing pre-release versions of R
+* Developing new features
+
+::: {.fragment}
+In this demo we'll focus on bug fixing!
+:::
+
+# How you can contribute to a bug {.inverse}
+
+::: {.notes}
+At any given time there will be 100s of open bugs.
+
+How can outside contributors help?
+- Add a minimal reproducible example (**reprex**)
+- Check reprex in the development version of R (**R-devel**)
+- Diagnose ...
+::: 
+
+## Add a minimal reproducible example (**reprex**)
+
+For code bugs, it helps to have a minimal reproducible example that demonstrates the 
+bug, using *only* core R packages.
+
+- Bug might be specific to a given platform/architecture
+- If you can't reproduce the bug, may be "worksforme" or fixed in more recent 
+version
+
+## Confirm it is a bug
+
+Check the issue really is a bug in base R
+
+- Is the code working as documented?
+- Is the bug in a contributed package?
+
+## Example: Not a Bug
+
+<https://bugs.r-project.org/show_bug.cgi?id=15971>
+
+:::: {.columns}
+::: {.column width="50%"}
+`na1.csv`
+```
+a, b,  c
+1, "b", 1
+2, "", 2
+ , "b", 3
+4,    , 4
+5, "NA", 5
+```
+:::
+
+::: {.column width="50%"}
+`na2.csv`
+```
+b,  c
+"b", 1
+"", 2
+"b", 3
+   , 4
+"NA", 5`
+```
+:::
+::::
+
+<br>
+
+::: {.fragment}
+```r
+df1 <- read.csv("na1.csv")
+df2 <- read.csv("na2.csv")
+df1$b==df2$b
+```
+```
+Error in Ops.factor(df1$b, df2$b) : level sets of factors are different
+```
+:::
+
+<br>
+
+::: {.fragment}
+::: {.columns}
+::: {.column width="50%"}
+```r
+levels(df1$b)
+```
+```
+[1] " "    "    " " b"   " NA" 
+```
+:::
+
+::: {.column width="50%"}
+```r
+levels(df2$b)
+```
+```
+[1] ""    "   " "b"
+```
+:::
+:::
 :::
 
 :::{.notes}
-Speaker notes go here.
+This took 7 years to be closed!
 :::
 
-# inverse class for section headings {.inverse}
+## Check reprex in the development version of R (**R-devel**)
 
-## inverse class is also useful for stressing *key points*. {.inverse .center-h .center .larger125}
+For confimed bugs, we need to check if they are still an issue in the current R 
+development version.
 
-## Colours
+- rig, the R Installation Manager, makes it easy to install multiple R versions, 
+including R-devel:
+<https://github.com/r-lib/rig>
+    
+## Analyse the issue
 
-There's a colour for inline code such as `x <- c(1, 3, 6)` and `{.inverse}`.
+Once the bug is confirmed in the development version of R, the bug should be 
+analysed
 
-There's also a colour for short [links](https://github.com/Warwick-Stats-Resources/warwickpres) and full ones like <https://quarto.org/docs/presentations/revealjs/>.
+- For code bugs: use the reprex to identify the root cause
+- For documentation bugs: review comments/code/references to understand the issue
 
-## Colours {.inverse}
+## Discuss how to fix
 
-There's a colour for inline code such as `x <- c(1, 3, 6)` and `{.inverse}`.
+Once the bug is fully understood, there should be a discussion about how to 
+fix the code/documentation.
 
-There's also a colour for short [links](https://github.com/Warwick-Stats-Resources/warwickpres) and full ones like <https://quarto.org/docs/presentations/revealjs/>.
+- For code bugs: what the code should do (user interface, statistical 
+approach, etc)
+- For documentation bugs: what should or shouldn't be documented
 
-- The inline code and link colours change when the inverse class is applied.
-- I wouldn't recommend using inverse class for a slide with this much text though.
+## Propose a fix
+
+If a member of R Core agrees how to fix a bug, but does not commit to fixing 
+it themselves, you may propose a fix
+
+ - Propose specific changes to code/documentation in the discussion 
+ - Prepare a patch of the R source files that makes specific changes
+
+# How to find a good bug to work on {.inverse}
+
+::: {.notes}
+First, we need to find a good bug to work on.
+:::
+
+## Bugzilla, <https://bugs.r-project.org>
+
+::: {.r-stack}
+::: {.fragment .fade-out fragment-index=0}
+![](media/bugzilla_main_page.png){fig-alt="Screenshot of R's Bugzilla showing an HTML table with the results of a search for open bugs, in order of the most recent change, with the newest at the top." width="80%"}
+:::
+::: {.fragment fragment-index=0}
+![](media/bugzilla_menu_browse.png){fig-alt="" width="80%"}
+:::
+:::
+
+:::{.fragment}
+You do not need account to browse bugs on Bugzilla.
+:::
+
+::: {.notes}
+Bugs in R are tracked in R's Bugzilla, which can be found at bugs.r-project.org. 
+We can browse the bugs by clicking on the browse button in the top menu.
+:::
 
 
-## Code
+<!-- https://mine-cetinkaya-rundel.github.io/quarto-tip-a-day/posts/23-titleless-slides/ -->
 
-The extension includes a custom syntax highlighting theme:
+## {#browse data-menu-title="Bugzilla - Browse"}
+
+::: {.r-stack}
+::: {.fragment .fade-out fragment-index=0}
+![](media/bugzilla_select_product.png){fig-alt=""}
+:::
+::: {.fragment .current-visible fragment-index=0}
+![](media/bugzilla_select_r.png){fig-alt=""}
+:::
+:::
+
+::: {.notes}
+There are two categories to browse, we'll focus on R, which are the bugs in R itself.
+:::
+
+## {#components data-menu-title="Bugzilla - Components"}
+
+::: {.r-stack}
+::: {.fragment .fade-out fragment-index=0}
+![](media/bugzilla_components.png){fig-alt=""}
+:::
+::: {.fragment .current-visible fragment-index=0}
+![](media/bugzilla_components2.png){fig-alt=""}
+:::
+:::
+
+::: {.notes}
+This takes you to a list of components, which are categories of bugs that you can look at. Let's take a look at Documentation.
+:::
+
+## {#bug-list data-menu-title="Bugzilla - Bug List"}
+
+::: {.r-stack}
+::: {.fragment .fade-out fragment-index=0}
+![](media/bugzilla_documentation.png){fig-alt=""}
+:::
+::: {.fragment .current-visible fragment-index=0}
+![](media/bugzilla_documentation2.png){fig-alt=""}
+:::
+:::
+
+::: {.notes}
+This returns a list of bugs that have been categorised as documentation bugs by the bug reporter.
+
+We can browse the summaries to look for bugs that we think we might be able to help with.
+
+Let's take a look at the last one here: "Clarification needed in ?c", which refers to the help file for the `c()` function.
+:::
+
+## {#metadata data-menu-title="Bugzilla - Metadata"}
+
+![](media/bug_report_metadata.png){fig-alt=""}
+
+::: {.notes}
+The top of the bug report shows some basic metadata. 
+:::
+
+## {#comments data-menu-title="Bugzilla - Comments"}
+
+![](media/bug_report_and_comment1.png){fig-alt=""}
+
+::: {.notes}
+If we scroll down, we'll see a description of the bug by the reporter, in this case Michael Chirico.
+
+Below that, there may be one or more comments from R core developers or other contributors.
+:::
+
+
+## What to look for
+
+::: {.fragment}
+Good: a bug report where the next step is clear.
+:::
+
+::: {.incremental}
+- A minimimal reproducible example
+- Checking in R-devel 
+- A diagnosis
+- A fix
+:::
+
+::: {.fragment}
+Even better: an [R Core](https://www.r-project.org/contributors.html) member supports the next step in a comment.
+:::
+
+::: {.notes}
+A good first issue is one where the next step is clear. 
+
+The bug report might need a minimal reproducible example to use as a test case.
+
+Or the bug might need checking in the development version of R,
+to see if it is still a bug or has already been fixed. 
+
+Alternatively, the bug might need debugging to diagnose the root cause.
+
+Finally, you might contribute to the discussion of how to fix the bug, 
+or even propose a patch.
+
+It is even better if an R Core member has shown support for one of these things in 
+a comment, so you know the next step for sure.
+:::
+
+## What to avoid
+
+::: {.incremental}
+- Too new
+- Too old
+- Commenters disagree on how to fix
+- Someone else is clearly working on it
+- Clearly requires specific expertise you lack
+:::
+
+::: {.notes}
+Bug reports that are too new are best avoided, as they are often taken up quickly by 
+experienced contributors.
+
+On the other hand, bug reports that are very old often lack consensus on the 
+next step or require a decision to be made by R Core.
+
+You should avoid bugs where there is disagreement on the next step or 
+someone else is clearly working on it.
+
+Finally avoid bugs that are clearly outside your areas of expertise.
+:::
+
+## R Core members
+
+When reviewing bug reports, it is helpful to know who is on [R Core](https://www.r-project.org/contributors.html)
+
+Main R Core members active on Bugzilla:
+
+ * Martin Maechler
+ * Tomas Kalibera
+ * Sebastian Meyer
+
+# Triaging bugs exercise {.inverse}
+
+## Audience participation!
+
+We will use Vevox to find out what you think about example bug reports.
+
+- Is it a good first issue?
+- If yes, what is the next step?
+
+Open [vevox.app](https://vevox.app/#/) in a browser.
+
+Enter the code: 116-836-295
+
+(You don't need to type the dashes).
+
+## Bug 18199
+
+<https://bugs.r-project.org/show_bug.cgi?id=18199>
+
+Summary: "zapsmall is wrong when vector has Inf"
+
+Bug report:
+
+> If a vector contains Inf, all the values but infinite become zero.
+> ```
+> zapsmall(c(0.1, 0.01)) # correct
+> [1] 0.10 0.01
+> zapsmall(c(0.1, 0.01, Inf)) # incorrect
+> [1] 0 0 Inf
+> ```
+
+The report has been open for 13.5 hours without comment.
+
+:::{.notes}
+Is this a good first issue?
+
+Ask people to share why yes/no and discuss (could be a good first issue 
+if you are familiar with zapsmall and know straight away that this is 
+not a bug).
+:::
+
+## Bug 17616
+
+<https://bugs.r-project.org/show_bug.cgi?id=17616>
+
+Summary: Anomaly with contrast functions
+
+Report: 
+
+> If you supply a contrast function to a factor, results depend on whether you pass the name or the actual function. This applies to C(), contrasts()<-, as well as lm(...., contrasts=list()). 
+
+:::{.columns}
+:::{.column width="50%"}
+```r
+lm(uptake ~ C(Treatment, "contr.treatment"), CO2)
+```
+```
+Call:
+lm(formula = uptake ~ C(Treatment, "contr.treatment"), data = CO2)
+
+Coefficients:
+                           (Intercept)  
+                                 30.64  
+C(Treatment, "contr.treatment")chilled  
+                                 -6.86
+```                                 
+:::
+:::{.column width="50%"}
+```r
+lm(uptake ~ C(Treatment, contr.treatment), CO2)
+```
+```
+Call:
+lm(formula = uptake ~ C(Treatment, contr.treatment), data = CO2)
+
+Coefficients:
+                     (Intercept)  
+                           30.64  
+C(Treatment, "contr.treatment")2  
+                           -6.86
+```  
+:::
+:::
+
+A contributor has commented to confirm the bug.
+
+The last comment was a month ago.
+
+::: {.notes}
+Yes, good first issue.
+
+Next step: analyse issue (maybe check in R-devel first, but looked at recently)
+:::
+
+## Bug 16305
+
+<https://bugs.r-project.org/show_bug.cgi?id=16305>
+
+Summary: Seeking more consistent package descriptions and citations
+
+Report:
+
+> The following command provides a convenient way of citing R packages
+> ```r
+> > paste(capture.output(print(citation('gdata'),style='latex')),collapse="")
+> ```
+> ```
+> [1] "Warnes GR, Bolker B, Gorjanc G, Grothendieck G, Korosec A, Lumley T, MacQueen D, Magnusson A, Rogers J and others (2014).\\emph{gdata: Various R programming tools for data manipulation}.R package version 2.13.3, \\url{http://CRAN.R-project.org/package=gdata}."
+> ```
+> However, some packages cannot be formatted this way [2 examples]
+>
+> Would it be possible to improve consistency in package descriptions and citations?
+
+* 1st example demonstrates issue with non-standard author specification in DESCRIPTION
+* 2nd example demonstrates issue with LaTeX commands that require additional packages
+
+Bug has been open for 7 years 9 months
+
+::: {.notes}
+Yes - new contributor could check if still an issue in R-devel, perhaps address
+first issue if still a bug and pass on
+No - not clear if this is a bug or a wishlist, could be complicated
+:::
+
+## Bug 18362
+
+<https://bugs.r-project.org/show_bug.cgi?id=18362>
+
+Summary: `head(letters, 1:2)` should give better error message
+
+Report from R Core member:
+
+> The error messages from checkHT() are really really not nice because they mention checkHT() instead of its caller's call, e.g.,
+> ```
+> head(letters, 1:2)
+> Error in checkHT(n, dx <- dim(x)) : 
+>   invalid 'n' - must have length one when dim(x) is NULL, got 2
+> ```
+> 
+
+* As an extension, also suggests creating an `errorCondition()` with its own 
+class and points to some existing examples for reference.
+
+A contributor volunteered to work on this, but it is nearly 1 year since they 
+volunteered
+
+::: {.notes}
+Yes - R Core is providing help, next step is to provide a patch (to R code),
+other contributor does not seem to have time. May be polite to check with Colin 
+1st.
+ - extension would require working with R sources
+This is currently still available!
+:::
+
+::: {.notes}
+Other 
+- https://bugs.r-project.org/show_bug.cgi?id=17720: good "helpwanted" issue,
+maybe not as first issue since will need to work directly with R sources
+
+
+:::
+## Shortcuts
+
+Get help finding a good first issue:
+
+- [R Contributor Office Hours](https://contributor.r-project.org/events/office-hours/)
+- [R Contributor Slack](https://contributor.r-project.org/slack) #work-out-loud channel
+
+::: {.notes}
+It can take a while to find an issue to work on, but there are some shortcuts 
+available.
+
+You can attend an R Contributor Office Hour or look on the #work-out-loud channel of the 
+R Contributors Slack where good first issues are sometimes shared.
+
+Or you can attend special events like the Bug BBQ, where good first issues are prepared 
+in advance.
+:::
+
+## Contribution workflow
+
+1. Find a good issue to work on.
+2. Work on the next step(s).
+3. When you have something useful to contribute add a comment to the report on 
+Bugzilla
+    - Use markdown formatting to make it easier to read
+    - Optionally add an attachment to share code or output, with a comment to 
+    explain what is in the attachment
+    - R core is emailed with every comment: avoid trivial comments, e.g. "+1"
+4. Wait for feedback from R Core (anything from hours to months!)
+
+Use the R Contributors Slack #workout-out-loud channel or Office Hours to get 
+help/feedback before posting on Bugzilla.
+
+## Getting an account on Bugzilla
+
+If we want to post anything on Bugzilla (make a bug report or comment on one),
+we need to get an account.
+
+* Send an e-mail to <bug-report-request@r-project.org> from the email address 
+that you want to use as your login. 
+* In this e-mail, briefly explain why you want an account. 
+    - This is a basic spam filter, a sentence is enough.
+
+# Getting to the root of the issue {.inverse}
+
+::: {.notes}
+One of the hardest tasks is analysing bugs to get to the root of the issue.
+:::
+
+## Coding Bug Demo: Bug 17863
+
+<https://bugs.r-project.org/show_bug.cgi?id=17863>
+
+<br>
+
+::: {.fragment}
+A 1-factor factor analysis:
+```{r}
+test <- factanal(mtcars[, 1:4], factors = 1)
+```
+:::
+
+::: {.notes}
+Let's look at an example: Bug 17863.
+
+The bug reporter provided some test code for a 1-factor factor analysis.
+:::
+
+## Printing the result
+
+:::: {.columns}
+::: {.column width="50%"}
+::: {.fragment}
+::: {.center}
+Good
+:::
+```{r}
+print(test)
+```
+:::
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+Bad
+```{r}
+print(test, sort = TRUE)
+```
+:::
+:::
+::::
+
+::: {.notes}
+When the print function is called on the resulting test object, various 
+elements of the result are printed as expected, including the call, 
+the uniquenesses and the loadings.
+
+Before R 4.3.0, when the print function was called with the argument sort = TRUE,
+we get an unexpected result. The loadings are printed as a vector rather than a 
+matrix, so we lose the row and column labels.
+:::
+
+## Finding the print method (1)
+
+::: {.fragment}
+```{r}
+class(test)
+```
+:::
+
+::: {.fragment}
+```{r}
+getAnywhere(print.factanal)
+```
+:::
+
+::: {.notes}
+The print function is an S3 generic, so we need to find out which S3 method is 
+being used here.
+
+First we use the class function to find out that test is an object of class factanal.
+
+If an S3 print method exists for this class, it will be called print.factanal.
+
+We use the getAnwhere function to search for this method. A method is found 
+in the stats package and printed out.
+
+In the body of the function we can see the cat and print calls that print 
+different elements of the factanal object. 
+
+In the 4th line of the function, print is called on the loadings element 
+to print the loadings.
+:::
+
+## Finding the print method (2)
+
+::: {.fragment}
+```{r}
+class(test$loadings)
+```
+:::
+::: {.fragment}
+```{r}
+getAnywhere(print.loadings)
+```
+:::
+
+::: {.notes}
+So now we repeat this exercise on the loadings element of our test object.
+
+We find out that the loadings element is an object of class loadings and 
+there is a print.loadings methods in the stats package.
+:::
+
+## Debugging print.loadings
+
+::: {.fragment}
+```{r}
+#| error: true
+debugonce(stats::print.loadings)
+```
+:::
+::: {.fragment}
+```{r}
+#| eval: FALSE
+debugonce(stats:::print.loadings)
+print(test, sort = TRUE)
+```
+```
+Call:
+factanal(x = mtcars[, 1:4], factors = 1)
+
+Uniquenesses:
+  mpg   cyl  disp    hp 
+0.199 0.078 0.120 0.261 
+debugging in: print.loadings(x$loadings, digits = digits, ...)
+debug: {
+    Lambda <- unclass(x)
+    p <- nrow(Lambda)
+    factors <- ncol(Lambda)
+    if (sort) {
+        mx <- max.col(abs(Lambda))
+        ind <- cbind(1L:p, mx)
+        mx[abs(Lambda[ind]) < 0.5] <- factors + 1
+        Lambda <- Lambda[order(mx, 1L:p), ]
+    }
+    cat("\nLoadings:\n")
+    fx <- setNames(format(round(Lambda, digits)), NULL)
+    nc <- nchar(fx[1L], type = "c")
+    fx[abs(Lambda) < cutoff] <- strrep(" ", nc)
+    print(fx, quote = FALSE, ...)
+    vx <- colSums(x^2)
+    varex <- rbind(`SS loadings` = vx)
+    if (is.null(attr(x, "covariance"))) {
+        varex <- rbind(varex, `Proportion Var` = vx/p)
+        if (factors > 1) 
+            varex <- rbind(varex, `Cumulative Var` = cumsum(vx/p))
+    }
+    cat("\n")
+    print(round(varex, digits))
+    invisible(x)
+}
+Browse[2]> 
+```
+:::
+
+::: {.notes}
+If we try running debugonce on stats::print.loadings, we get an error telling us 
+that print.loadings is not exported from the stats package.
+
+We can access internal functions by using three colons instead, so debugonce 
+runs without error.
+
+Now when we run print test with sort = TRUE, the call and uniquenesses are 
+printed, but when print.loadings is called we enter a debugging environment.
+
+The body of this function is printed out to the console ... [scroll down] ... 
+and at the end we find a Browse prompt.
+:::
+
+## Press Enter to step through line by line
+
+::: {.fragment}
+```
+Browse[2]> 
+debug: Lambda <- unclass(x)
+```
+:::
+::: {.fragment}
+```
+Browse[2]> 
+debug: p <- nrow(Lambda)
+```
+:::
+::: {.fragment}
+```
+Browse[2]> 
+debug: factors <- ncol(Lambda)
+```
+:::
+::: {.fragment}
+```
+Browse[2]> 
+debug: if (sort) {
+    mx <- max.col(abs(Lambda))
+    ind <- cbind(1L:p, mx)
+    mx[abs(Lambda[ind]) < 0.5] <- factors + 1
+    Lambda <- Lambda[order(mx, 1L:p), ]
+}
+```
+:::
+::: {.fragment}
+```
+Browse[2]> 
+debug: mx <- max.col(abs(Lambda))
+```
+:::
+::: {.fragment}
+```
+Browse[2]> 
+debug: ind <- cbind(1L:p, mx)
+```
+:::
+::: {.fragment}
+```
+Browse[2]> 
+debug: mx[abs(Lambda[ind]) < 0.5] <- factors + 1
+```
+:::
+::: {.fragment}
+```
+Browse[2]> 
+debug: Lambda <- Lambda[order(mx, 1L:p), ]
+```
+:::
+
+::: {.notes}
+We can press the enter or return key to step through the code in the 
+print.loadings function, running one line at a time. (1,2,3)
+
+Here we get to a conditional block that is run if sort = TRUE, as in our test case.
+When we press return, we enter this block and can continue stepping through line by line. (1, 2, 3, 4)
+
+At the end of this block, there is a line where an object Lambda is overwritten
+by an ordered version of itself. 
+
+Before running this line, we can print Lambda with and without the ordering. 
+:::
+
+## Print objects
+
+::: {.fragment}
+```
+Browse[2]> Lambda[order(mx, 1L:p), ]
+       mpg        cyl       disp         hp 
+-0.8947285  0.9603623  0.9381177  0.8594404 
+```
+:::
+
+::: {.fragment}
+```
+Browse[2]> Lambda
+        Factor1
+mpg  -0.8947285
+cyl   0.9603623
+disp  0.9381177
+hp    0.8594404
+```
+:::
+
+::: {.fragment}
+```
+Browse[2]> Lambda[order(mx, 1L:p), , drop = FALSE]
+        Factor1
+mpg  -0.8947285
+cyl   0.9603623
+disp  0.9381177
+hp    0.8594404
+Browse[2]> 
+```
+:::
+
+::: {.notes}
+Here it is with the ordering...
+
+... and here it is without.
+
+Clearly the ordering is changing the structure of the object - we have found 
+the root cause of the issue!
+
+In this case, there is a simple fix.
+
+Experienced R programmers may know that when the rows of a one-column matrix are 
+indexed, a vector is returned, unless we set drop = FALSE, as here.
+:::
+
+
+## Modify function
 
 ```{r}
-#| echo: true
-#| eval: false
-library(dplyr)
-library(palmerpenguins)
-
-penguins %>%
-  mutate(
-    long_flipper = case_when(
-      species == "Adelie" & flipper_length_mm > 195 ~ TRUE,
-      species == "Chinstrap" & flipper_length_mm > 200 ~ TRUE,
-      species == "Gentoo" & flipper_length_mm > 225 ~ TRUE,
-      TRUE ~ FALSE
-    )
-  ) %>%
-  mutate(
-    body_mass_kg = body_mass_g / 1000,
-    bill_length_cm = bill_length_mm / 10,
-    bill_depth_cm = bill_depth_mm / 10
-  )
+print.loadings <- function (x, digits = 3L, cutoff = 0.1, sort = FALSE, ...) 
+{
+  Lambda <- unclass(x)
+  p <- nrow(Lambda)
+  factors <- ncol(Lambda)
+  if (sort) {
+    mx <- max.col(abs(Lambda))
+    ind <- cbind(1L:p, mx)
+    mx[abs(Lambda[ind]) < 0.5] <- factors + 1
+    Lambda <- Lambda[order(mx, 1L:p), , drop = FALSE]
+  }
+  cat("\nLoadings:\n")
+  fx <- setNames(format(round(Lambda, digits)), NULL)
+  nc <- nchar(fx[1L], type = "c")
+  fx[abs(Lambda) < cutoff] <- strrep(" ", nc)
+  print(fx, quote = FALSE, ...)
+  vx <- colSums(x^2)
+  varex <- rbind(`SS loadings` = vx)
+  if (is.null(attr(x, "covariance"))) {
+    varex <- rbind(varex, `Proportion Var` = vx/p)
+    if (factors > 1) 
+      varex <- rbind(varex, `Cumulative Var` = cumsum(vx/p))
+  }
+  cat("\n")
+  print(round(varex, digits))
+  invisible(x)
+}
 ```
 
-## warwickplots
+::: {.notes}
+We can check this fix, by creating our own version of print.loadings with 
+the fix applied.
+:::
 
-TODO: expand on the link between the theme and {warwickplots}, once finished (include adding `theme_warwick()`, giving link to warwickplots repo). Also, split out code and output (tabset?) on this slide.
+## Check
 
 ```{r}
-library(warwickplots)
-library(ggplot2)
-ggplot(diamonds[sample(nrow(diamonds), 1000), ], aes(carat, price)) +
-  geom_point(aes(colour = clarity)) +
-  scale_colour_palette_d(warwick_palettes$aubergine) +
-  labs(title = "A plot with a Warwick palette and theme") #+
-  # theme_warwick()
+print.loadings(test$loadings, sort = TRUE)
 ```
 
-## Callouts {.smaller70}
+::: {.notes}
+After sourcing our version of print.loadings we can test it on the loadings 
+element of our test object.
 
-There are custom colours for callouts: 
-
-:::{.callout-note}
-A note
+The fix works!
 :::
 
-:::{.callout-warning}
-A warning
-:::
+## Documentation Bug exercise: Bug 17699
 
-:::{.callout-important}
-Something important
-:::
+<https://bugs.r-project.org/show_bug.cgi?id=17699>
 
-:::{.callout-tip}
-This is a good idea
-:::
+Summary: trivial error in persp example
 
-:::{.callout-caution}
-Be careful about doing this
-:::
+Reprex:
+```r
+# (1) The Obligatory Mathematical surface.
+#     Rotated sinc function.
 
-These require a raw html chunk at the end of the presentation .qmd file (included in template).
-
-# Non-Warwick-specific nice-to-haves {.inverse}
-
-## Alignment
-
-There are classes to help with text alignment:
-
-:::{.center-h}
-`{.center-h}` gives horizontally-centered text
-:::
-
-:::{.right}
-`{.right}` gives right-aligned text
-:::
-
-:::{.callout-note}
-For all revealjs Quarto presentations, applying `{.center}` to the slide title vertically centers the whole slide.
-:::
-
-## Sizing
-
-There are classes to help size text by a given percentage:
-
-[`{.smaller90}`]{.smaller90}, [`{.smaller80}`]{.smaller80}, [`{.smaller75}`]{.smaller75}
-[`{.smaller70}`]{.smaller70}, [`{.smaller60}`]{.smaller60}, [`{.smaller50}`]{.smaller50}
-
-[`{.larger125}`]{.larger125}, [`{.larger150}`]{.larger150}, [`{.larger175}`]{.larger175}, 
-[`{.larger200}`]{.larger200}, [`{.larger250}`]{.larger250}
-
-## TODO
-
-- Maybe take some ideas from? [kakashi](https://github.com/malcolmbarrett/kakashi-quarto-theme) theme
-
-## More Information
-
-You can learn more about controlling the appearance of RevealJS output here: <https://quarto.org/docs/presentations/revealjs/>
-
-## How to edit the theme/see available classes
-
-```{=html}
-<!-- needs to be last chunk of presentation otherwise creates an extra slide -->
-<!-- tint80 for border, tint20 for title -->
-<!-- this should hopefully no longer be necessary in Quarto 1.4 -->
-<!-- https://github.com/quarto-dev/quarto-cli/issues/5038 -->
-<style type="text/css">
-div.callout-note {
-  border-left-color: #336695 !important;
-}
-
-div.callout-note.callout-style-default .callout-title {
-  background-color: #CCD9E4 !important;
-}
-
-div.callout-caution {
-  border-left-color: #AE4240 !important;
-}
-
-div.callout-caution.callout-style-default .callout-title {
-  background-color: #ebd0cf !important;
-}
-
-div.callout-tip {
-  border-left-color: #618157 !important;
-}
-
-div.callout-tip.callout-style-default .callout-title {
-  background-color: #d8e0d5 !important;
-}
-
-div.callout-important {
-  border-left-color: #775781 !important;
-}
-
-div.callout-important.callout-style-default .callout-title {
-  background-color: #ddd5e0 !important;
-}
-
-div.callout-warning {
-  border-left-color: #956133 !important;
-}
-
-div.callout-warning.callout-style-default .callout-title {
-  background-color: #e4d8cc !important;
-}
-</style>
+x <- seq(-10, 10, length = 30)
+y <- x
+f <- function(x, y) { r <- sqrt(x^2+y^2); 10 * sin(r)/r }
+z <- outer(x, y, f)
+z[is.na(z)] <- 1
 ```
 
+Reported Problems: 
+
+* `is.na(z)` implies that there are `NA`s - but there aren't!
+* The limit of {10 * sin(r)/r} as x and y approach zero is 10 not 1.
+
+Suggested Solutions:
+
+* Change the length to 31, so there is a single `NaN` and handle `NAs` within the function `f`.
+* Set z to 10, where there's NaN(s) OR Remove the `10 *`
+
+## Q1. Is this issue still present? 
+
+::: {.fragment}
+(Prior to R 4.2.2) Yes, `?graphics::persp` has the code as shown in the bug report
+
+ - This code still gives the same result in current R  
+:::
+
+::: {.fragment}
+::: {.columns}
+::: {.column width="45%"}
+```r
+# (1) The Obligatory Mathematical surface.
+#     Rotated sinc function.
+
+x <- seq(-10, 10, length = 30)
+y <- x
+f <- function(x, y) { 
+  r <- sqrt(x^2+y^2); 
+  10 * sin(r)/r }
+z <- outer(x, y, f)
+z[is.na(z)] <- 1
+op <- par(bg = "white")
+persp(x, y, z, theta = 30, phi = 30, 
+  expand = 0.5, col = "lightblue")
+```
+:::
+::: {.column width="55%"}
+```{r, fig.width = 7, fig.height = 7}
+#| echo: false
+x <- seq(-10, 10, length = 30)
+y <- x
+f <- function(x, y) { r <- sqrt(x^2+y^2); 10 * sin(r)/r }
+z <- outer(x, y, f)
+z[is.na(z)] <- 1
+op <- par(bg = "white")
+persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = "lightblue")
+```
+:::
+:::
+:::
+
+## Q2a: Is the reporter's analysis correct? (`NAs`)
+
+:::{.fragment}
+* In the reprex, there are no `NA`s in `z`.
+:::
+
+:::{.fragment}
+```{r}
+x <- seq(-10, 10, length = 30)
+y <- x
+f <- function(x, y) { r <- sqrt(x^2+y^2); 10 * sin(r)/r }
+z <- outer(x, y, f)
+anyNA(z)
+```
+:::
+
+:::{.fragment}
+* If we change the length of `x` and `y` to 31, `z` does have `NA`
+:::
+
+:::{.fragment}
+```{r}
+x <- seq(-10, 10, length = 31)
+y <- x
+f <- function(x, y) { r <- sqrt(x^2+y^2); 10 * sin(r)/r }
+z <- outer(x, y, f)
+anyNA(z)
+```
+:::
+
+## Q2a (ii) When is `z` equal to `NA`?
+
+:::{.fragment}
+```{r}
+which(is.na(z), arr.ind = TRUE)
+x[16]
+y[16]
+```
+:::
+
+## Q2b: Is the reporter's analysis correct? (Definition)
+
+* The limit of {10 * sin(r)/r} as x and y approach zero is 10 not 1.
+
+Check the definition of the sinc function e.g. [on Wikipedia](https://en.wikipedia.org/wiki/Sinc_function)
+$$ \text{sinc } x = \frac{\sin x}{x} $$
+The value at $x = 0$ is defined to be the limiting value
+$$ \text{sinc } 0 := \lim_{x \rightarrow 0} \frac{\sin x}{x} = 1$$
+
+::: {.fragment}
+(The full definition of `f` is the "rotated sinc function" which
+computes the sinc function for the radius of a circle centred at 
+co-ordinates 0,0)
+:::
+
+## Q2b (ii): Why was the scaling by 10 added?
+
+Continuing through example, a second persp plot is created from the data with axis ticks, lines and points.
+
+ * Maybe the scaling is so the z axis labels are less crowded?
+ * Maybe to simplify the code to add the sin wave (green line)?
+
+::: {.columns}
+::: {.column width="50%"}
+```{r, fig.width = 6, fig.height = 6}
+#| echo: false
+par(mar = c(4, 4, 1.1, 0.1))
+x <- seq(-10, 10, length.out = 30)
+y <- x
+f <- function(x, y) { r <- sqrt(x^2+y^2); 10 * sin(r)/r }
+z <- outer(x, y, f)
+z[is.na(z)] <- 1
+op <- par(bg = "white")
+persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = "lightblue",
+      ltheta = 120, shade = 0.75, ticktype = "detailed",
+      xlab = "X", ylab = "Y", zlab = "Sinc( r )",
+      main = "With *10 scaling"
+) -> res
+
+# (2) Add to existing persp plot - using trans3d() :
+
+xE <- c(-10,10); xy <- expand.grid(xE, xE)
+points(trans3d(xy[,1], xy[,2], 6, pmat = res), col = 2, pch = 16)
+lines (trans3d(x, y = 10, z = 6 + sin(x), pmat = res), col = 3)
+
+phi <- seq(0, 2*pi, length.out = 201)
+r1 <- 7.725 # radius of 2nd maximum
+xr <- r1 * cos(phi)
+yr <- r1 * sin(phi)
+lines(trans3d(xr,yr, f(xr,yr), res), col = "pink", lwd = 2)
+```
+```r
+lines (trans3d(x, y = 10, z = 6 + sin(x),
+       pmat = res), col = 3)
+```
+:::
+::: {.column width="50%"}
+```{r, fig.width = 6, fig.height = 6}
+#| echo: false
+par(mar = c(4, 4, 1.1, 0.1))
+x <- seq(-10, 10, length.out = 30)
+y <- x
+f <- function(x, y) { r <- sqrt(x^2+y^2); sin(r)/r }
+z <- outer(x, y, f)
+z[is.na(z)] <- 1
+op <- par(bg = "white")
+persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = "lightblue",
+      ltheta = 120, shade = 0.75, ticktype = "detailed",
+      xlab = "X", ylab = "Y", zlab = "Sinc( r )",
+      main = "Without scaling"
+) -> res
+
+# (2) Add to existing persp plot - using trans3d() :
+
+xE <- c(-10,10); xy <- expand.grid(xE, xE)
+points(trans3d(xy[,1], xy[,2], 0.6, pmat = res), col = 2, pch = 16)
+lines (trans3d(x, y = 10, z = 0.6 + sin(x)/10, pmat = res), col = 3)
+
+phi <- seq(0, 2*pi, length.out = 201)
+r1 <- 7.725 # radius of 2nd maximum
+xr <- r1 * cos(phi)
+yr <- r1 * sin(phi)
+lines(trans3d(xr,yr, f(xr,yr), res), col = "pink", lwd = 2)
+```
+```r
+lines (trans3d(x, y = 10, z = 0.6 + sin(x)/10,
+       pmat = res), col = 3)
+```
+:::
+:::
+
+## Q3: How should we fix the issue? (`NAs`)
+
+Option 1: Change the length of `x` and `y` to 31 and handle `NA`s 
+within the function `f`.
+
+- Follows the full definition of the sinc function
+- General solution for any length of `x` and `y`
+
+Option 2 (new idea): Keep the length at 30 and don't handle `NA`s 
+at all
+
+- We know there are no `NA`s in this case
+- Simplifies example
+
+## Q3: How should we fix the issue? (Definition)
+
+Option 1: Set `z` to 10 if there are any `NA`s
+
+- Don't need to change code for second persp plot
+- Plot + code for second plot slightly neater
+
+Option 2: Remove the scaling by 10
+
+- Follows the definition of the sinc function: easier to follow
+- Simplifies initial code (as in reprex)
+- Maybe we can adjust parameters to improve axis labels
+
+## What happened in the end?
+
+| Contributor proposal (via patch)                                                                        | R Core Reviewer                                                                 |
+|---------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| Remove handling of NAs for being unnecessary                                                            | Agreed with this, after considering both options                                |
+| Remove the scale of function f as not needed by definition                                              | Agreed scaling is not necessary, but also did not see a need to remove it       |
+| Changed the axes and label font size to 0.62 and 0.8 respectively to make the second graph clear | Thought this a matter of taste, but did make a simpler change along these lines |
+| Modify the z-axis values of trans3d in both points and lines to account for the removal of the scale in | Thought it simpler to keep the scale                                            |
+
+:::{.fragment}
+::: {.callout-tip}   
+Make minimal change to fix the issue.
+:::
+:::
+
+# How to propose a fix {.inverse}
+
+::: {.notes}
+Once we have a fix, how can propose it to R Core?
+:::
+
+## Comment on Bugzilla
+
+For bug 17863 (`print.loadings` bug) it was enough to propose the fix in a comment
+
+![](media/bug_analysis.png){fig-alt=""}
+
+::: {.notes}
+If the fix is simple to describe, we can propose it by adding a comment on 
+Bugzilla, as I have done here.
+
+To add comments, you need a Bugzilla account, see the link for more details.
+:::
+
+## Create a patch via GitHub
+
+Alternatively, create a patch using the r-svn mirror of the R sources:
+<https://github.com/r-devel/r-svn>
+
+![](media/r-svn.png){fig-alt=""}
+
+::: {.notes}
+Alternatively, you can create a patch using the r-svn mirror of the R sources.
+:::
+
+## Find source file to edit
+
+::: {.r-stack}
+::: {.fragment .fade-out fragment-index=0}
+![](media/r-svn_print-loadings.png){fig-alt=""}
+:::
+::: {.fragment fragment-index=0}
+![](media/r-svn_print-loadings2.png){fig-alt=""}
+:::
+:::
+
+::: {.fragment}
+This will create a fork of the r-svn repo on your GitHub account.
+:::
+
+::: {.notes}
+Find the source file containing the code you want to change.
+
+Click the edit button: this will create a fork of the r-svn repo on your 
+GitHub account and open a window where you can edit the file.
+:::
+
+## Edit the code in the browser
+
+::: {.r-stack}
+::: {.fragment .fade-out fragment-index=0}
+![](media/r-svn_print-loadings_edit.png){fig-alt=""}
+:::
+::: {.fragment fragment-index=0}
+![](media/r-svn_print-loadings_edit2.png){fig-alt=""}
+:::
+:::
+
+::: {.fragment}
+Committing changes will create a branch on your fork
+:::
+
+::: {.notes}
+Make the changes in the source file. 
+
+When you are ready, click the `Commit changes...` button to commit these changes 
+to your fork - a new branch will be created with your changes.
+:::
+
+
+## Open a PR (1)
+
+::: {.r-stack}
+::: {.fragment .fade-out fragment-index=0}
+![](media/open_pr.png){fig-alt=""}
+:::
+::: {.fragment .current-visible fragment-index=0}
+![](media/open_pr2.png){fig-alt=""}
+:::
+:::
+
+::: {.notes}
+Now you will see a `Compare & pull request` button on your fork. 
+
+Click this to open a pull request back to the original r-svn repo.
+:::
+
+## Open a PR (2)
+
+::: {.r-stack}
+::: {.fragment .fade-out fragment-index=0}
+![](media/pr.png){fig-alt=""}
+:::
+::: {.fragment fragment-index=0}
+![](media/pr2.png){fig-alt=""}
+:::
+:::
+
+::: {.notes}
+Enter a description of your changes - here I have written "Minor change for demo".
+
+If you want, you can add more information in the comment box for people you 
+might ask to review your pull request.
+:::
+
+## Automated checks
+
+::: {.r-stack}
+::: {.fragment .fade-out fragment-index=0}
+![](media/pr_checks.png){fig-alt=""}
+:::
+::: {.fragment fragment-index=0}
+![](media/pr_checks2.png){fig-alt=""}
+:::
+
+::: {.notes}
+Once you have created a pull request, you will be taken back to the original 
+repo and you'll see some automated checks starting to run.
+
+These build R on different platforms and run its test suite.
+
+If the checks pass, everything in amber here will turn green.
+:::
+:::
+
+## Create a patch
+
+Add `.diff` to the URL for your PR, e.g. <https://github.com/r-devel/r-svn/pull/124.diff>
+
+:::{.fragment}
+![](media/pr_diff.png){fig-alt=""}
+:::
+
+::: {.fragment}
+Right-click to save `.diff` file.
+
+This patch can be attached to the Bugzilla report, with a comment.
+:::
+
+::: {.notes}
+If everything looks good, add `.diff` to the URL for your Pull Request and enter the modified URL in your browser. This will generate a diff of your changes.
+
+Right-click on the browser window to save this as a `.diff` file. 
+
+You can then attach the diff file to the bug 
+report on Bugzilla, with a comment explaining your proposed fix.
+:::
+
+# Going forward {.inverse}
+
+## Caveats
+
+This demo has focused on good first issues
+
+::: {.incremental}
+ - Most bug reports are not so clear
+ - Many bugs in R are actually in the C code
+ - Modifications to C code, or R code that is called indirectly requires 
+ re-building R to test
+     - This is not as easy as using devtools to load package code
+:::
+
+:::{.fragment}
+There is still lot of scope for new contributors!
+:::
+
+## Where next?
+
+::: {.incremental}
+- [R Development Guide](https://contributor.r-project.org/rdevguide) 
+- [R Contributor Events](https://contributor.r-project.org/events)
+- [R Contributor Slack](https://contributor.r-project.org/slack)
+:::
+
+::: {.notes}
+This quick demo has run through the basics of contributing to fixing bugs in R.
+
+For more information on this and other ways to contribute, 
+ - refer to the online R Development Guide
+ - attend R Contributor Events
+ - or join the Slack group for peer support.
+:::
+
+## {#end data-menu-title="Let's go!"}
+
+<center>
+```{r, fig.alt = "Cartoon of a rocket launching", out.width = "40%", echo = FALSE}
+knitr::include_graphics("media/reshot-icon-rocket-ZQTKM9NG32.svg")
+```
+</center>
+
+::: {.notes}
+We hope this has inspired you to start contributing to R
+:::
+
+## Links
+ - R Core: <https://www.r-project.org/contributors.html>
+ - R Contributor Office Hours: <https://contributor.r-project.org/events/office-hours/>
+ - R Contributor Slack: <https://contributor.r-project.org/slack>
+ - Bug BBQ: <https://contributor.r-project.org/events/bug-bbq/>
+ - How to get a Bugzilla account: <https://contributor.r-project.org/rdevguide/BugTrack.html#RCorePkgBug>
+ - R Development Guide: <https://contributor.r-project.org/rdevguide/>
+ 
+ - Slides for this demo: <https://hturner.github.io/contributing-demo>
