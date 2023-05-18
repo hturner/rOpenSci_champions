@@ -1268,6 +1268,14 @@ You can then attach the diff file to the bug
 report on Bugzilla, with a comment explaining your proposed fix.
 :::
 
+## Informal review
+
+An advantage of creating the patch on GitHub is that you can ask another 
+contributor to review the changes before posting on Bugzilla.
+
+See <https://github.com/r-devel/r-svn/pull/103> for an example discussing 
+the change to the `persp` documentation (Bug 17699).
+
 # Going forward {.inverse}
 
 ## Caveats
